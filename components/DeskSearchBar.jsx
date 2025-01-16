@@ -1,0 +1,85 @@
+'use client'
+import { useState, useEffect } from 'react';
+import { CiSearch } from "react-icons/ci";
+import { FaLocationDot } from "react-icons/fa6";
+
+export default function DeskSearchBar({ onCitySelect }) {
+    const [query, setQuery] = useState('');
+    const [suggestions, setSuggestions] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (query.trim() === '') {
+            setSuggestions([]);
+            return;
+        }
+
+        const fetchSuggestions = async () => {
+            setLoading(true);
+            try {
+                const response = await fetch(`api/autocomplete?query=${query}`);
+                const data = await response.json();
+                setSuggestions(data);
+            } catch (error) {
+                console.error('Error fetching autocomplete suggestions:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        const debounceFetch = setTimeout(fetchSuggestions, 300); // Debounce API requests
+        return () => clearTimeout(debounceFetch);
+    }, [query]);
+
+    return (
+        <div className="relative hidden md:block">
+
+            {/* Search Input */}
+            <input
+                type="text"
+                placeholder="Search City"
+                className="h-[40px] w-[460px] bg-zinc-100 text-black dark:bg-[#1E1E1E] dark:text-white rounded-lg placeholder:text-zinc-400 px-4 outline-none"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+            />
+
+            {/* Search Button & Loading Indicator */}
+            <button
+                className="h-[40px] w-10 bg-zinc-100 text-black dark:bg-[#1E1E1E] dark:text-white text-2xl flex justify-center items-center rounded-r-lg transition-all duration-300 absolute right-0 top-0 bottom-0"
+                disabled={loading} // Disable button while loading
+            >
+                {loading ? (
+                    <div className="w-6 h-6 border-[3px] border-t-transparent border-sky-400 rounded-full animate-spin"></div>
+                ) : (
+                    <CiSearch />
+                )}
+            </button>
+
+            {/* Search Suggestions */}
+            {suggestions.length > 0 && (
+                <div className="w-[460px] bg-zinc-100 text-black dark:bg-[#1E1E1E] dark:text-white fixed top-[64px] rounded-lg shadow overflow-hidden">
+
+                    {suggestions.map((city, index) => (
+
+                        <button
+                            key={index}
+                            className={`w-full flex gap-2 items-center ${index !== suggestions.length - 1 ? 'border-b dark:border-b-zinc-700' : ''
+                                } text-start px-4 py-2 hover:bg-zinc-200 dark:hover:bg-[#1a1919] transition-all duration-300`}
+                            onClick={() => {
+                                onCitySelect(city.name); // Pass the city to the parent
+                                setQuery(''); // Clear the input box after city is selected
+                                setSuggestions([]); // Clear suggestions
+                            }}
+                        >
+
+                            <FaLocationDot />
+                            {city.name}, {city.region}, {city.country}
+
+                        </button>
+
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}

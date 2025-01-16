@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #111015;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #111015;
+    --foreground: #ffffff;
+  }
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Hide scrollbar on all browsers */
+.scroll-container::-webkit-scrollbar {
+  display: none; /* Hides scrollbar for Webkit browsers (Chrome, Safari, etc.) */
+}
+
+.scroll-container {
+  -ms-overflow-style: none;  /* Hides scrollbar for Internet Explorer and Edge */
+  scrollbar-width: none;  /* Hides scrollbar for Firefox */
+}
